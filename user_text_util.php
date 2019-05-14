@@ -10,8 +10,15 @@ $txt_dir = "texts";
 // TODO get from args.
 $delim = ';';
 
-//$users_file = file($users_filename);
-//$users = array_map('str_getcsv', $users_file);
+function countAverageLineCount($files, $user_id) {
+  foreach ($files as $filename) {
+    if (explode('-', $filename)[0] == $user_id) {
+      echo "$filename" + PHP_EOL;
+    }
+  }
+  $count = 0;
+  return $count;
+}
 
 $users_file = fopen($users_filename, 'r');
 if (!$users_file) exit;
@@ -22,6 +29,7 @@ while ($parsed = fgetcsv($users_file, 0, $delim)) {
 
 $txt_files = array_diff(scandir($txt_dir), array('..', '.'));
 
-var_dump($txt_files);
+//var_dump($txt_files);
+countAverageLineCount($txt_files, 0);
 
 ?>
