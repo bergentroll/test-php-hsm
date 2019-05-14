@@ -5,11 +5,13 @@
 # Started 14.05.19 at 19:29
 # 21:07 countAverageLineCount done.
 #
-# TODO Absolute paths.
+# 22:10 Suspended due to sleep.
 
+# TODO Absolute paths.
 $users_filename = 'people.csv';
 $txt_dir = 'texts/';
-$txt_output_dir = '';
+// TODO Create if does not exist.
+$txt_output_dir = 'output_texts/';
 $filename_delim = '-';
 
 // TODO get from args.
@@ -24,11 +26,10 @@ function countUserAvgLines($files, $user_id) {
     if ((int)explode($filename_delim, $filename)[0] === $user_id) {
       $files_num++;
       $file = fopen($txt_dir . $filename, 'r');
-      fgets($file);
-      while (!feof($file)) {
+      while (fgets($file)) {
         $lines_num++;
-        fgets($file);
       }
+      fclose($file);
     }
   }
   if ($files_num) $result = $lines_num / $files_num;
@@ -42,24 +43,42 @@ function countAverageLineCount($users, $files) {
 }
 
 function replaceDates($users, $files) {
-  global $filename_delim, $txt_dir;
+  global $filename_delim, $txt_dir, $txt_output_dir;
+  $users_stat = array();
+  //$counter = 0;
+  foreach ($users as $user_id => $username) $users_stat[$user_id] = 0;
   foreach ($files as $filename) {
-    //if ((int)explode($filename_delim, $filename)[0] === $user_id) {
     $file = fopen($txt_dir . $filename, 'r');
+    $file_new = fopen($txt_output_dir . $filename, 'w');
+    while ($line = fgets($file)) {
+      $user_id = (int)explode($filename_delim, $filename)[0];
+      /// Not perfect matching, but simple.
+      $line = preg_replace('&(\d+)/(\d+)/(\d+)&', '$2-$1-20$3', $line, -1, $counter);
+      $users_stat[$user_id] += $counter;
+      fwrite($file_new, $line);
+    }
+    fclose($file);
+    fclose($file_new);
+  }
+
+  foreach ($users as $user_id => $username) {
+    echo "$username: ${users_stat[$user_id]}" . PHP_EOL;
   }
 }
 
 $users_file = fopen($users_filename, 'r');
 if (!$users_file) exit;
-
 while ($parsed = fgetcsv($users_file, 0, $csv_delim)) {
   $users[(int)$parsed[0]] = $parsed[1];
 }
+fclose($users_file);
 
 // TODO Include path.
 $txt_files = array_diff(scandir($txt_dir), array('..', '.'));
 
 //var_dump($txt_files);
 echo countAverageLineCount($users, $txt_files);
+
+replaceDates($users, $txt_files);
 
 ?>
