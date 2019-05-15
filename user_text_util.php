@@ -1,13 +1,17 @@
+#!/usr/bin/php
 <?php
-# GNU/Linux
-# PHP 7
 
-# Started 14.05.19 at 19:29
-# 21:07 countAverageLineCount done.
-#
-# 22:10 Suspended due to sleep.
-# 10:39 Resume.
-# 11:02 Fully works.
+/* Данный скрипт является ответом на тестовое задание для Hearst Shkulev Digital
+ * Regional Network
+ * <https://gist.github.com/ilyachase/c454271ca3c7ecc111b47213289b48a0>.
+ * © 2019 Антон Карманов <bergentroll@insiberia.net>.
+ *
+ * Скрипт протесирован на ОС GNU/Linux с использованием интерпретатора PHP 7.3.5.
+ * Так как в задании не указано иное, при расширении дат принято, что все даты
+ * относятся к XXI веку.
+ *
+ * Затраченное на выполнение задания время: 4 ч 16 мин.
+ */
 
 // Globals
 /// Name of a csv formatted file with user identifiers and names.
@@ -58,8 +62,8 @@ function countUserAvgLines($files, $user_id, $dir, $delim = '-') {
   return $result;
 }
 
-/** @brief Count average lines number for user's files for multiple users and print
- *  result to stdout.
+/** @brief Count average lines number for user's files for multiple users and
+ * print result to stdout.
  *  @param $users Array in format $user_id => $user_name.
  *  @param $files List of valid filenames to parse. Filenames must begins with
  *  user identifier and delimiter.
@@ -97,7 +101,6 @@ function replaceDates($users, $files, $input_dir, $output_dir, $delim = '-') {
     $file = fopen($input_dir . $filename, 'r');
     $file_new = fopen($output_dir . $filename, 'w');
     while ($line = fgets($file)) {
-      // Так как не указано иное, принято, что все даты относятся к XXI веку.
       $line = preg_replace('&([0-3]\d)/([0-1]\d)/(\d{2})[^\d]&', '$2-$1-20$3', $line, -1, $counter);
       $users_stat[$user_id] += $counter;
       fwrite($file_new, $line);
