@@ -23,15 +23,14 @@ $action = 'countAverageLineCount';
 $csv_delim = ';';
 $usage_str = "Usage: $argv[0] [comma/semicolon] [countAverageLineCount/replaceDates]" . PHP_EOL;
 
-function countUserAvgLines($files, $user_id) {
-  global $filename_delim, $txt_dir;
+function countUserAvgLines($files, $user_id, $dir, $delim = '-') {
   $files_num = 0;
   $lines_num = 0;
   $result = 0.0;
   foreach ($files as $filename) {
-    if ((int)explode($filename_delim, $filename)[0] === $user_id) {
+    if ((int)explode($delim, $filename)[0] === $user_id) {
       $files_num++;
-      $file = fopen($txt_dir . $filename, 'r');
+      $file = fopen($dir . $filename, 'r');
       while (fgets($file)) {
         $lines_num++;
       }
@@ -42,24 +41,26 @@ function countUserAvgLines($files, $user_id) {
   return $result;
 }
 
-function countAverageLineCount($users, $files) {
+function countAverageLineCount($users, $files, $dir, $delim = '-') {
   foreach($users as $user_id => $username) {
-    echo "$username: " . countUserAvgLines($files, $user_id) . PHP_EOL;
+    echo "$username: " . countUserAvgLines($files, $user_id, $dir, $delim) . PHP_EOL;
   }
 }
 
-function replaceDates($users, $files) {
-  global $filename_delim, $txt_dir, $txt_output_dir;
+function replaceDates($users, $files, $input_dir, $output_dir, $delim = '-') {
   $users_stat = array();
   foreach ($users as $user_id => $username) $users_stat[$user_id] = 0;
   foreach ($files as $filename) {
-    $file = fopen($txt_dir . $filename, 'r');
-    $file_new = fopen($txt_output_dir . $filename, 'w');
+    $user_id = (int)explode($delim, $filename)[0];
+    if (!isset($users_stat[$user_id])) {
+      echo "OLOLO!\n";
+      continue;
+    }
+    $file = fopen($input_dir . $filename, 'r');
+    $file_new = fopen($output_dir . $filename, 'w');
     while ($line = fgets($file)) {
-      $user_id = (int)explode($filename_delim, $filename)[0];
-      // TODO Make regex some more precise.
-      // В задании не уточнялось, как расширять год, так что считается, что все даты относятся к XXI веку.
-      $line = preg_replace('&(\d+)/(\d+)/(\d+)&', '$2-$1-20$3', $line, -1, $counter);
+      // Так как не указано иное, принято, что все даты относятся к XXI веку.
+      $line = preg_replace('&([0-3]\d)/([0-1]\d)/(\d{2})[^\d]&', '$2-$1-20$3', $line, -1, $counter);
       $users_stat[$user_id] += $counter;
       fwrite($file_new, $line);
     }
@@ -110,10 +111,10 @@ $txt_files = array_diff(scandir($txt_dir), array('..', '.'));
 
 switch ($action) {
 case 'countAverageLineCount':
-  countAverageLineCount($users, $txt_files);
+  countAverageLineCount($users, $txt_files, $txt_dir, $filename_delim);
   break;
 case 'replaceDates':
-  replaceDates($users, $txt_files);
+  replaceDates($users, $txt_files, $txt_dir, $txt_output_dir, $filename_delim);
   break;
 }
 
