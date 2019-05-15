@@ -11,7 +11,6 @@
 
 // TODO Comments.
 
-# TODO Absolute paths.
 $users_filename = 'people.csv';
 $txt_dir = 'texts/';
 // TODO Create if does not exist.
@@ -22,6 +21,12 @@ $action = 'countAverageLineCount';
 // TODO get from args.
 $csv_delim = ';';
 $usage_str = "Usage: $argv[0] [comma/semicolon] [countAverageLineCount/replaceDates]" . PHP_EOL;
+
+$cwd = getcwd();
+
+$users_filename = "$cwd/$users_filename";
+$txt_dir = "$cwd/$txt_dir";
+$txt_output_dir = "$cwd/$txt_output_dir";
 
 function countUserAvgLines($files, $user_id, $dir, $delim = '-') {
   $files_num = 0;
@@ -50,12 +55,10 @@ function countAverageLineCount($users, $files, $dir, $delim = '-') {
 function replaceDates($users, $files, $input_dir, $output_dir, $delim = '-') {
   $users_stat = array();
   foreach ($users as $user_id => $username) $users_stat[$user_id] = 0;
+  if (!file_exists($output_dir)) mkdir($output_dir);
   foreach ($files as $filename) {
     $user_id = (int)explode($delim, $filename)[0];
-    if (!isset($users_stat[$user_id])) {
-      echo "OLOLO!\n";
-      continue;
-    }
+    if (!isset($users_stat[$user_id])) continue;
     $file = fopen($input_dir . $filename, 'r');
     $file_new = fopen($output_dir . $filename, 'w');
     while ($line = fgets($file)) {
